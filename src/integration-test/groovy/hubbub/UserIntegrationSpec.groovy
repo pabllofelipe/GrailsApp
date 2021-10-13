@@ -25,4 +25,29 @@ class UserIntegrationSpec extends Specification {
         joe.id != null
         User.get(joe.id).loginId == joe.loginId
     }
+
+    def "Updating a saved user before"(){
+        given: "A existing user"
+        def existingUser = new User(loginId: 'joe', password: 'secret',
+                homepage: 'http://www.grailsinaction.com')
+        existingUser.save(failOnError: true)
+        when: "A property is changed"
+        def FoundUser = User.get(existingUser.id)
+        FoundUser.password = "changed"
+        FoundUser.save(failOnError: true)
+        then: "the change is reflected to database"
+        User.get(existingUser.id).password == 'changed'
+    }
+
+    def "Deleting a User"(){
+        given: "An existing user"
+        def existingUser = new User(loginId: 'joe', password: 'secret',
+                homepage: 'http://www.grailsinaction.com')
+        existingUser.save(failOnError:true)
+        when: "The user is deleted"
+        def FoundUser = User.get(existingUser.id)
+        FoundUser.delete(flush: true)
+        then: "the user was deleted from database"
+        !User.exists(FoundUser.id)
+    }
 }
